@@ -1,17 +1,14 @@
 package com.example.base.core.exception;
 
-
-import jakarta.annotation.Nullable;
-import org.apache.coyote.Response;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.*;
-import org.springframework.validation.FieldError;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
-import java.util.HashMap;
 import java.util.Map;
 
 @RestControllerAdvice
@@ -23,8 +20,10 @@ public class GlobalHandlerException extends ResponseEntityExceptionHandler {
 
         problem.setTitle("Validation Error");
         var errors = ex.getBindingResult().getFieldErrors().stream()
-                .map(error -> Map.of("field", error.getField(),
-                        "message", error.getDefaultMessage())).toList();
+                .map(error -> Map.of(
+                        "field", error.getField(),
+                        "message", error.getDefaultMessage() == null ? "valor inválido" : error.getDefaultMessage()))
+                .toList();
 
         problem.setProperty("errors", errors);
 
@@ -32,22 +31,34 @@ public class GlobalHandlerException extends ResponseEntityExceptionHandler {
     }
 
     @ExceptionHandler(UsuarioNotFoundException.class)
-    public ResponseEntity<Map<String, Object>> handleUsuarioNotFound(UsuarioNotFoundException ex) {
-        Map<String, Object> body = new HashMap<>();
-        body.put("status", HttpStatus.NOT_FOUND.value());
-        body.put("erro", "Usuário não encontrado");
-        body.put("mensagem", ex.getMessage());
-
-        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(body);
+    public ResponseEntity<ProblemDetail> handleUsuarioNotFound(UsuarioNotFoundException ex) {
+        ProblemDetail problem = ProblemDetail.forStatusAndDetail(HttpStatus.NOT_FOUND, ex.getMessage());
+        problem.setTitle("Usuário não encontrado");
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(problem);
     }
 
     @ExceptionHandler(EmailJaCadastradoException.class)
-    public ResponseEntity<Map<String, Object>> handleEmailJaCadastrado(EmailJaCadastradoException ex) {
-        Map<String, Object> body = new HashMap<>();
-        body.put("status", HttpStatus.CONFLICT.value());
-        body.put("erro", "E-mail já cadastrado");
-        body.put("mensagem", ex.getMessage());
+    public ResponseEntity<ProblemDetail> handleEmailJaCadastrado(EmailJaCadastradoException ex) {
+        ProblemDetail problem = ProblemDetail.forStatusAndDetail(HttpStatus.CONFLICT, ex.getMessage());
+        problem.setTitle("E-mail já cadastrado");
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(problem);
+    }
 
-        return ResponseEntity.status(HttpStatus.CONFLICT).body(body);
+    // Segurança extra: dois cadastros iguais ao mesmo tempo (constraint unique do banco)
+    @ExceptionHandler(DataIntegrityViolationException.class)
+    public ResponseEntity<ProblemDetail> handleIntegridade(DataIntegrityViolationException ex) {
+        ProblemDetail problem = ProblemDetail.forStatusAndDetail(HttpStatus.CONFLICT,
+                "Já existe um registro com esses dados");
+        problem.setTitle("Conflito de dados");
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(problem);
+    }
+
+    // Login com e-mail ou senha errados
+    @ExceptionHandler(BadCredentialsException.class)
+    public ResponseEntity<ProblemDetail> handleCredenciaisInvalidas(BadCredentialsException ex) {
+        ProblemDetail problem = ProblemDetail.forStatusAndDetail(HttpStatus.UNAUTHORIZED,
+                "E-mail ou senha inválidos");
+        problem.setTitle("Credenciais inválidas");
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(problem);
     }
 }

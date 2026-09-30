@@ -1,16 +1,16 @@
 package com.example.base.controller;
 
 import com.example.base.dto.AdminRequest;
+import com.example.base.dto.AdminResponse;
 import com.example.base.dto.LoginReqDto;
 import com.example.base.model.Usuario;
 import com.example.base.service.AdminService;
 import com.example.base.service.AuthService;
 import jakarta.persistence.Access;
+import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/auth")
@@ -22,12 +22,13 @@ public class AuthController {
     private final AdminService adminService;
 
     @PostMapping("/login")
-    public String login(@RequestBody LoginReqDto dto){
+    public String login(@RequestBody @Valid LoginReqDto dto) {
         return authService.login(dto);
     }
 
     @PostMapping("/signup")
-    public void signUp(@RequestBody AdminRequest dto){
-        adminService.cadastrarAdministrador(dto);
+    @ResponseStatus(HttpStatus.CREATED)
+    public AdminResponse signUp(@RequestBody @Valid AdminRequest dto) {
+        return adminService.signup(dto);
     }
 }

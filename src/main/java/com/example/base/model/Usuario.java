@@ -1,14 +1,9 @@
 package com.example.base.model;
 
-
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-
-import java.util.List;
-
 
 @Entity
 @Getter
@@ -21,7 +16,7 @@ public class Usuario {
     private String papel;
     @Column(nullable = false)
     private String nome;
-    @Column(nullable = false)
+    @Column(nullable = false, unique = true)
     private String email;
     @Column(nullable = false)
     private String senha;

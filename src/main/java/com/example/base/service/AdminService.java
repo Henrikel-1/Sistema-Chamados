@@ -8,5 +8,6 @@ import java.util.List;
 public interface AdminService {
 
     AdminResponse cadastrarAdministrador(AdminRequest adminRequest);
+    AdminResponse signup(AdminRequest adminRequest);
     List<AdminResponse> listarAdministradores();
 }

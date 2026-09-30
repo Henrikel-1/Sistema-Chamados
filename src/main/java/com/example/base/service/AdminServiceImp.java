@@ -15,27 +15,42 @@ import java.util.List;
 @Service
 public class AdminServiceImp implements AdminService {
 
-    private final AdminRepository adminRepository;
+    private static final String ADMIN = "ADMIN";
+    private static final String USUARIO = "USUARIO";
 
+    private final AdminRepository adminRepository;
     private final PasswordEncoder passwordEncoder;
 
+    @Override
     public AdminResponse cadastrarAdministrador(AdminRequest adminRequest) {
-        if (adminRepository.existsByEmail(adminRequest.email())) {
-            throw new EmailJaCadastradoException(
-                    "Já existe um administrador cadastrado com o e-mail: " + adminRequest.email()
-            );
-        }
-       Usuario usuario = new Usuario();
-       usuario.setPapel("ADMIN");
-       usuario.setNome(adminRequest.nome());
-       usuario.setEmail(adminRequest.email());
-       usuario.setSenha(passwordEncoder.encode(adminRequest.senha()));
-       adminRepository.save(usuario);
-
-       return new AdminResponse(usuario.getId(), ("ADMIN"), adminRequest.nome(), adminRequest.email());
+        return cadastrar(adminRequest, ADMIN);
     }
 
+    @Override
+    public AdminResponse signup(AdminRequest adminRequest) {
+        boolean primeiroAdmin = !adminRepository.existsByPapel(ADMIN);
+        return cadastrar(adminRequest, primeiroAdmin ? ADMIN : USUARIO);
+    }
+
+    @Override
     public List<AdminResponse> listarAdministradores() {
-        return adminRepository.findAll().stream().map(admin -> new AdminResponse(admin.getId(), admin.getPapel(), admin.getNome(), admin.getEmail())).toList();
+        return adminRepository.findAll().stream()
+                .map(u -> new AdminResponse(u.getId(), u.getPapel(), u.getNome(), u.getEmail()))
+                .toList();
+    }
+
+    private AdminResponse cadastrar(AdminRequest request, String papel) {
+        if (adminRepository.existsByEmail(request.email())) {
+            throw new EmailJaCadastradoException(
+                    "Já existe um usuário cadastrado com o e-mail: " + request.email());
+        }
+        Usuario usuario = new Usuario();
+        usuario.setPapel(papel);
+        usuario.setNome(request.nome());
+        usuario.setEmail(request.email());
+        usuario.setSenha(passwordEncoder.encode(request.senha()));
+        adminRepository.save(usuario);
+
+        return new AdminResponse(usuario.getId(), papel, usuario.getNome(), usuario.getEmail());
     }
 }
