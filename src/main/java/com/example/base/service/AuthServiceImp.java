@@ -2,7 +2,6 @@ package com.example.base.service;
 
 import com.example.base.core.security.JwtService;
 import com.example.base.dto.LoginReqDto;
-import com.example.base.dto.LoginRespDto;
 import lombok.AllArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -16,7 +15,6 @@ public class AuthServiceImp implements AuthService {
     private final AuthenticationManager authenticationManager;
 
     private final JwtService jwtService;
-
 
     @Override
     public String login(LoginReqDto dto) {

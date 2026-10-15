@@ -16,7 +16,7 @@ import java.util.List;
 public class AdminServiceImp implements AdminService {
 
     private static final String ADMIN = "ADMIN";
-    private static final String USUARIO = "USUARIO";
+    private static final String USER = "USER";
 
     private final AdminRepository adminRepository;
     private final PasswordEncoder passwordEncoder;
@@ -29,7 +29,7 @@ public class AdminServiceImp implements AdminService {
     @Override
     public AdminResponse signup(AdminRequest adminRequest) {
         boolean primeiroAdmin = !adminRepository.existsByPapel(ADMIN);
-        return cadastrar(adminRequest, primeiroAdmin ? ADMIN : USUARIO);
+        return cadastrar(adminRequest, primeiroAdmin ? ADMIN : USER);
     }
 
     @Override

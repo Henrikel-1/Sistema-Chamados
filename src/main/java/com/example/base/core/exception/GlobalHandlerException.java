@@ -44,7 +44,6 @@ public class GlobalHandlerException extends ResponseEntityExceptionHandler {
         return ResponseEntity.status(HttpStatus.CONFLICT).body(problem);
     }
 
-    // Segurança extra: dois cadastros iguais ao mesmo tempo (constraint unique do banco)
     @ExceptionHandler(DataIntegrityViolationException.class)
     public ResponseEntity<ProblemDetail> handleIntegridade(DataIntegrityViolationException ex) {
         ProblemDetail problem = ProblemDetail.forStatusAndDetail(HttpStatus.CONFLICT,
@@ -53,12 +52,25 @@ public class GlobalHandlerException extends ResponseEntityExceptionHandler {
         return ResponseEntity.status(HttpStatus.CONFLICT).body(problem);
     }
 
-    // Login com e-mail ou senha errados
     @ExceptionHandler(BadCredentialsException.class)
     public ResponseEntity<ProblemDetail> handleCredenciaisInvalidas(BadCredentialsException ex) {
         ProblemDetail problem = ProblemDetail.forStatusAndDetail(HttpStatus.UNAUTHORIZED,
                 "E-mail ou senha inválidos");
         problem.setTitle("Credenciais inválidas");
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(problem);
+    }
+
+    @ExceptionHandler(ChamadoNotFoundException.class)
+    public ResponseEntity<ProblemDetail> handleChamadoNotFound(ChamadoNotFoundException ex) {
+        ProblemDetail problem = ProblemDetail.forStatusAndDetail(HttpStatus.NOT_FOUND, ex.getMessage());
+        problem.setTitle("Chamado não encontrado");
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(problem);
+    }
+
+    @ExceptionHandler(AcessoNegadoException.class)
+    public ResponseEntity<ProblemDetail> handleAcessoNegado(AcessoNegadoException ex) {
+        ProblemDetail problem = ProblemDetail.forStatusAndDetail(HttpStatus.FORBIDDEN, ex.getMessage());
+        problem.setTitle("Acesso negado");
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(problem);
     }
 }

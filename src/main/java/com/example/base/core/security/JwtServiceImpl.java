@@ -47,7 +47,7 @@ public class JwtServiceImpl implements JwtService {
         List<String> authorities = claims.get("authorities", List.class);
 
         var grantedAuthorities = authorities.stream().map(SimpleGrantedAuthority::new).collect(Collectors.toList());
-        var  usuarioLogadoDto = new UsuarioLogadoDto(Long.parseLong(userId));
+        var usuarioLogadoDto = new UsuarioLogadoDto(Long.parseLong(userId), authorities.contains("ADMIN"));
         return new UsernamePasswordAuthenticationToken(usuarioLogadoDto, token, grantedAuthorities);
     }
 }

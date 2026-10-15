@@ -47,23 +47,21 @@ public class SecurityConfig {
                         session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(a -> a
                         .requestMatchers("/auth/**", "/error").permitAll()
-                        .requestMatchers("/admins/**").hasAuthority("ADMIN")
+                        .requestMatchers("/admins/**", "/chamados/admin").hasAuthority("ADMIN")
                         .anyRequest().authenticated())
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
                 .exceptionHandling(e -> e
-                        // sem token ou token inválido -> 401
                         .authenticationEntryPoint((request, response, ex) ->
-                                escreverErro(response, HttpStatus.UNAUTHORIZED,
+                                mostrarErro(response, HttpStatus.UNAUTHORIZED,
                                         "Token ausente, inválido ou expirado"))
-                        // logado, mas sem permissão -> 403
                         .accessDeniedHandler((request, response, ex) ->
-                                escreverErro(response, HttpStatus.FORBIDDEN,
+                                mostrarErro(response, HttpStatus.FORBIDDEN,
                                         "Você não tem permissão para acessar este recurso")));
 
         return http.build();
     }
 
-    private static void escreverErro(HttpServletResponse response, HttpStatus status, String detalhe) throws IOException {
+    private static void mostrarErro(HttpServletResponse response, HttpStatus status, String detalhe) throws IOException {
         response.setStatus(status.value());
         response.setContentType("application/problem+json");
         response.setCharacterEncoding("UTF-8");
