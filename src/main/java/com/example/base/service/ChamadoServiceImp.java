@@ -8,6 +8,7 @@ import com.example.base.dao.ChamadoRepository;
 import com.example.base.dto.AdminResponse;
 import com.example.base.dto.ChamadoRequest;
 import com.example.base.dto.ChamadoResponse;
+import com.example.base.mapper.ChamadoMapper;
 import com.example.base.model.Categoria;
 import com.example.base.model.Chamado;
 import com.example.base.model.StatusChamado;
@@ -23,19 +24,13 @@ public class ChamadoServiceImp implements ChamadoService {
 
     private final ChamadoRepository chamadoRepository;
     private final AdminRepository adminRepository;
-
+    private final ChamadoMapper chamadoMapper;
     @Override
     public ChamadoResponse cadastrarNovoChamado(Long usuarioId, ChamadoRequest chamadoRequest) {
         Usuario usuario = adminRepository.findById(usuarioId)
                 .orElseThrow(() -> new UsuarioNotFoundException("Usuario não encontrado"));
 
-        Chamado chamado = new Chamado();
-        chamado.setDescricao(chamadoRequest.descricao());
-        chamado.setTitulo(chamadoRequest.titulo());
-        chamado.setUsuario(usuario);
-        chamado.setStatus(StatusChamado.ABERTO);
-        chamado.setPrioridade(chamadoRequest.prioridade());
-        chamado.setCategoria(chamadoRequest.categoria());
+        Chamado chamado = chamadoMapper.toEntity(chamadoRequest);
         chamadoRepository.save(chamado);
         return toResponse(chamado);
     }

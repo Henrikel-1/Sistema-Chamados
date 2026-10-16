@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.29.xsd">
+
+    <changeSet id="001-criacao-tabelas-usuario-e-chamado" author="Keldson">
+
+        <createTable tableName="usuario">
+            <column name="id" type="BIGINT" autoIncrement="true">
+                <constraints primaryKey="true" primaryKeyName="pk_usuario"/>
+            </column>
+            <column name="nome" type="VARCHAR(100)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="email" type="VARCHAR(100)">
+                <constraints nullable="false" unique="true"/>
+            </column>
+            <column name="senha" type="VARCHAR(100)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="papel" type="VARCHAR(50)">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <createTable tableName="chamado">
+            <column name="id" type="BIGINT" autoIncrement="true">
+                <constraints primaryKey="true" primaryKeyName="pk_chamado"/>
+            </column>
+            <column name="titulo" type="VARCHAR(150)"/>
+            <column name="descricao" type="VARCHAR(500)"/>
+            <column name="status" type="VARCHAR(30)"/>
+            <column name="prioridade" type="VARCHAR(30)"/>
+            <column name="categoria" type="VARCHAR(30)"/>
+            <column name="usuario_id" type="BIGINT">
+                <constraints nullable="true"
+                             foreignKeyName="fk_chamado_usuario"
+                             references="usuario(id)"/>
+            </column>
+        </createTable>
+
+        <rollback>
+            <dropTable tableName="chamado"/>
+            <dropTable tableName="usuario"/>
+        </rollback>
+
+    </changeSet>
+
+</databaseChangeLog>
